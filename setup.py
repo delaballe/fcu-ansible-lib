@@ -1,10 +1,3 @@
-# @Author: cyril.gratecos.ext
-# @Date:   2017-05-05T19:29:41+02:00
-# @Last modified by:   cyril.gratecos.ext
-# @Last modified time: 2017-05-08T08:40:49+02:00
-
-
-
 #!/usr/bin/env python
 
 # Copyright (c) 2017, Cyril Gratecos <cyril.gratecos@gmail.com>
