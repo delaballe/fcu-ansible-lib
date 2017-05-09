@@ -1,0 +1,9 @@
+*.retry
+*.pyc
+*.pyo
+
+.DS_Store
+
+draft/
+build/
+src/*.egg-info
