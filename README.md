@@ -1,4 +1,4 @@
-fcu-ansibla-lib
+fcu-ansible-lib
 ===========
 
 This is the main library to use Ansible on the Outscale® Cloud Platform
