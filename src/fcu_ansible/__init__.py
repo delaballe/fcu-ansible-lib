@@ -5,8 +5,9 @@
 # to the complete work.
 #
 # Copyright (c), Michael DeHaan <michael.dehaan@gmail.com>, 2012-2013
+# Copyright (c), Cyril Gratecos <cyril.gratecos@gmail.com>, 2017
 # All rights reserved.
-#
+
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
 #
@@ -26,7 +27,7 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 # USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-__version__="0.1"
+__version__="1.0"
 
 import os
 import re
@@ -35,15 +36,15 @@ from time import sleep
 from ansible.module_utils.cloud import CloudRetry
 
 try:
-    import fcu_boto
-    import fcu_boto.ec2 #boto does weird import stuff
+    import boto
+    import fcu_boto.fcu #boto does weird import stuff
     HAS_BOTO = True
 except ImportError:
     HAS_BOTO = False
 
 try:
-    import fcu_boto3
-    import fcu_botocore
+    import boto3
+    import botocore
     HAS_BOTO3 = True
 except:
     HAS_BOTO3 = False
@@ -193,10 +194,10 @@ def get_aws_connection_info(module, boto3=False):
             region = os.environ['EC2_REGION']
         else:
             if not boto3:
-                # fcu_boto.config.get returns None if config not found
-                region = fcu_boto.config.get('Boto', 'aws_region')
+                # boto.config.get returns None if config not found
+                region = boto.config.get('Boto', 'aws_region')
                 if not region:
-                    region = fcu_boto.config.get('Boto', 'ec2_region')
+                    region = boto.config.get('Boto', 'ec2_region')
             elif HAS_BOTO3:
                 # here we don't need to make an additional call, will default to 'us-east-1' if the below evaluates to None.
                 region = botocore.session.get_session().get_config_variable('region')
@@ -251,8 +252,8 @@ def get_ec2_creds(module):
 def boto_fix_security_token_in_profile(conn, profile_name):
     ''' monkey patch for boto issue boto/boto#2100 '''
     profile = 'profile ' + profile_name
-    if fcu_boto.config.has_option(profile, 'aws_security_token'):
-        conn.provider.set_security_token(fcu_boto.config.get(profile, 'aws_security_token'))
+    if boto.config.has_option(profile, 'aws_security_token'):
+        conn.provider.set_security_token(boto.config.get(profile, 'aws_security_token'))
     return conn
 
 
@@ -278,14 +279,14 @@ def ec2_connect(module):
     # If we have a region specified, connect to its endpoint.
     if region:
         try:
-            ec2 = connect_to_aws(fcu_boto.ec2, region, **boto_params)
-        except (fcu_boto.exception.NoAuthHandlerFound, AnsibleAWSError) as e:
+            ec2 = connect_to_aws(fcu_boto.fcu, region, **boto_params)
+        except (boto.exception.NoAuthHandlerFound, AnsibleAWSError) as e:
             module.fail_json(msg=str(e))
     # Otherwise, no region so we fallback to the old connection method
     elif ec2_url:
         try:
-            ec2 = fcu_boto.connect_ec2_endpoint(ec2_url, **boto_params)
-        except (fcu_boto.exception.NoAuthHandlerFound, AnsibleAWSError) as e:
+            ec2 = boto.connect_ec2_endpoint(ec2_url, **boto_params)
+        except (boto.exception.NoAuthHandlerFound, AnsibleAWSError) as e:
             module.fail_json(msg=str(e))
     else:
         module.fail_json(msg="Either region or ec2_url must be specified")

@@ -1,3 +1,2 @@
-fc2-ansible-lib
+fcu-ansible
 ===========
-
